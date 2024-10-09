@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon's World Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;1,700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Reset */
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            /* Hides the bottom scrollbar */
+            overflow: hidden;
+        }
+
+        /* Styling of the Game's Name */
+        #gameName {
+            position: absolute;
+            left: 24vw;
+            background-color: white;
+            font-weight: bold;
+            font-size: 4rem;
+        }
+
+        /* Background image styling */
+        .container {
+            background-image: url('cover.png'); /* Update this path to your background image */
+            background-size: cover;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .design {
+            position: absolute;
+            top: 109px;
+            right: 57px;
+            background-color: black;
+            padding: 10px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* ScoreCard Styling */
+        #scorecount {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: black;
+            padding: 28px;
+            border-radius: 20px;
+            color: white;
+        }
+
+        /* Obstacle image styling and positioning */
+        .obstacle {
+            background-image: url('obstacle.png'); /* Update this path to your obstacle image */
+            background-size: cover;
+            width: 154px;
+            height: 117px;
+            position: absolute;
+            bottom: 0px;
+            right: 120px;
+        }
+
+        /* Applying animation to the obstacle so that it can move towards left */
+        .animateobstacle {
+            animation: aniob 5s linear infinite;
+        }
+
+        @keyframes aniob {
+            0% {
+                left: 100vw;
+            }
+            100% {
+                left: -10vw;
+            }
+        }
+
+        /* Dragon's styling */
+        .dragon {
+            background-image: url('dragon.png'); /* Update this path to your dragon image */
+            background-size: cover;
+            width: 194px;
+            height: 101px;
+            position: absolute;
+            bottom: 0px;
+            left: 90px;
+        }
+
+        /* Applying animation to the dragon so that it can save himself by jumping up */
+        .animatedragon {
+            animation: ani 1s linear;
+        }
+
+        @keyframes ani {
+            0% {
+                bottom: 0px;
+            }
+            25% {
+                bottom: 150px;
+            }
+            50% {
+                bottom: 300px;
+            }
+            75% {
+                bottom: 211px;
+            }
+            100% {
+                bottom: 0px;
+            }
+        }
+
+        /* Game over styling and positioning */
+        .gameover {
+            visibility: hidden;
+            font-family: 'Ubuntu', sans-serif;
+            position: absolute;
+            top: 50vh;
+            left: 35vw;
+            color: red;
+            font-weight: bold;
+            font-size: 6rem;
+            background-color: firebrick;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="gameName">Welcome to Dragon's World</h1>
+    <div class="container">
+        <button onclick="restart()" class="design">Restart</button>
+        <div class="gameover">Game Over</div>
+        <div id="scorecount">Your score : 0</div>
+        <div class="obstacle animateobstacle"></div>
+        <div class="dragon" style="left: 426px;"></div>
+    </div>
+    
+    <script>
+        let cross = true;
+        let score = 0;
+        const scorecount = document.getElementById('scorecount');
+
+        document.onkeydown = function (e) {
+            const dragon = document.querySelector('.dragon');
+            if (e.keyCode === 38) {
+                dragon.classList.add('animatedragon');
+                setTimeout(() => {
+                    dragon.classList.remove('animatedragon');
+                }, 700);
+            } else if (e.keyCode === 37) {
+                let dragonx = parseInt(window.getComputedStyle(dragon, null).getPropertyValue('left'));
+                dragon.style.left = `${dragonx - 112}px`;
+            } else if (e.keyCode === 39) {
+                let dragonx = parseInt(window.getComputedStyle(dragon, null).getPropertyValue('left'));
+                dragon.style.left = `${dragonx + 112}px`;
+            }
+        };
+
+        setInterval(() => {
+            const dragon = document.querySelector('.dragon');
+            const gameover = document.querySelector('.gameover');
+            const obstacle = document.querySelector('.obstacle');
+
+            const dx = parseInt(window.getComputedStyle(dragon, null).getPropertyValue('left'));
+            const dy = parseInt(window.getComputedStyle(dragon, null).getPropertyValue('bottom'));
+            const ox = parseInt(window.getComputedStyle(obstacle, null).getPropertyValue('left'));
+            const oy = parseInt(window.getComputedStyle(obstacle, null).getPropertyValue('bottom'));
+
+            const offsetx = Math.abs(dx - ox);
+            const offsety = Math.abs(dy - oy);
+
+            if (offsetx < 120 && offsety <= 144) {
+                if (score !== 0) {
+                    scorecount.innerHTML = "Your score : " + score;
+                }
+                gameover.style.visibility = 'visible';
+                obstacle.classList.remove('animateobstacle');
+            } else if (offsetx < 125 && cross) {
+                score += 1;
+                updateScore(score);
+                cross = false;
+                setTimeout(() => {
+                    cross = true;
+                }, 1000);
+
+                setInterval(() => {
+                    const obsanidur = parseFloat(window.getComputedStyle(obstacle, null).getPropertyValue('animation-duration'));
+                    obstacle.style.animationDuration = obsanidur - 0.01 + 's';
+                }, 500);
+            }
+        }, 10);
+
+        function updateScore(score) {
+            scorecount.innerHTML = "Your score : " + score;
+        }
+
+        function restart() {
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>
